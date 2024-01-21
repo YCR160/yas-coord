@@ -1,0 +1,15 @@
+{
+    "game": [
+        "genshin",
+        "starrail"
+    ],
+    "os": [
+        "windows",
+        "linux",
+        "macos"
+    ],
+    "resolutions": [
+        "1920x1080",
+        "1280x720"
+    ]
+}
