@@ -18,10 +18,10 @@ def get_value(suffix, rectangle_coords):
         dict: Dictionary containing the position and size of the rectangle.
     """
     top, left, bottom, right = map(int, rectangle_coords)
-    width, height = right - left, bottom - top
-    return {"_rect": {"top": top, "left": left, "width": width, "height": height},
-            "_pos": {"x": left, "y": top},
-            "_size": {"width": width, "height": height}}.get(suffix)
+    width, height = right - left + 1, bottom - top + 1
+    return {"_rect": {"Rect": {"top": top, "left": left, "width": width, "height": height}},
+            "_pos": {"Pos": {"x": left, "y": top}},
+            "_size": {"Size": {"width": width, "height": height}}}.get(suffix)
 
 def get_rectangle_coords(image_path):
     """
@@ -48,7 +48,7 @@ def save_json(data, file_path):
 
 data = load_json('rog.json')
 combinations = list(product(data['game'], data['os'], data['resolutions']))
-os_name_mapping = {'windows': 'Windows', 'macos': 'MacOS', 'linux': 'Linux'}
+os_name_mapping = {'windows': 'Windows', 'macos': 'macOS', 'linux': 'Linux'}
 
 for game, os_name, resolution in combinations:
     path = os.path.join('assets', game, os_name, resolution)
@@ -59,9 +59,8 @@ for game, os_name, resolution in combinations:
         if os.path.exists(repo_file):
             json_dict.update(load_json(repo_file))
         width, height = map(int, resolution.split('x'))
-        g = gcd(width, height)
-        resolution_family = f'{os_name_mapping.get(os_name.lower(), os_name)}{width // g}x{height // g}'
-        save_dict = {'current_resolution': {'width': str(width), 'height': str(height)},
+        resolution_family = f'{os_name_mapping.get(os_name.lower(), os_name)}{width // gcd(width, height)}x{height // gcd(width, height)}'
+        save_dict = {'current_resolution': {'width': width, 'height': height},
                      'resolution_family': resolution_family,
                      'data': {k: json_dict[k] for k in sorted(json_dict)}}
         save_json(save_dict, os.path.join('target', game, os_name, resolution) + '.json')
