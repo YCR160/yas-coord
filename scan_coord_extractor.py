@@ -37,6 +37,23 @@ def get_rectangle_coords(image_path):
     non_black_coords = np.where(img_array != 0)
     return np.min(non_black_coords[0]), np.min(non_black_coords[1]), np.max(non_black_coords[0]), np.max(non_black_coords[1])
 
+def blacken_and_restore_color(image_path, pos):
+    """
+    Blacken the image and restore the color in the position.
+
+    Args:
+        image_path (str): Path of the image.
+        pos (dict): Dictionary containing the position.
+    """
+    img = Image.open(image_path)
+    img_array = np.array(img)[:, :, :3]
+    original_color = img_array[pos['y'], pos['x']].copy()
+    img_array[:] = 0
+    img_array[pos['y'], pos['x']] = original_color
+    img = Image.fromarray(img_array)
+    img.save(image_path)
+    return original_color
+
 def load_json(file_path):
     with open(file_path, 'r') as f:
         return json.load(f)
@@ -63,4 +80,12 @@ for game, os_name, resolution in combinations:
         save_dict = {'current_resolution': {'width': width, 'height': height},
                      'resolution_family': resolution_family,
                      'data': {k: json_dict[k] for k in sorted(json_dict)}}
+        if game == 'starrail':
+            character_pos = save_dict['data']['starrail_relic_equipper_pos']['Pos']
+            character_files = [file for file in os.listdir(os.path.join(path, 'characters')) if file.endswith('.png')]
+            character_colors = {}
+            for file in character_files:
+                character_color = blacken_and_restore_color(os.path.join(path, 'characters', file), character_pos)
+                character_colors[file[:-4]] = {'r': int(character_color[0]), 'g': int(character_color[1]), 'b': int(character_color[2])}
+            print(character_colors)
         save_json(save_dict, os.path.join('target', game, os_name, resolution) + '.json')
