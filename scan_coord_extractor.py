@@ -76,9 +76,9 @@ for game, os_name, resolution in combinations:
         if os.path.exists(repo_file):
             json_dict.update(load_json(repo_file))
         width, height = map(int, resolution.split('x'))
-        resolution_family = f'{os_name_mapping.get(os_name.lower(), os_name)}{width // gcd(width, height)}x{height // gcd(width, height)}'
         save_dict = {'current_resolution': {'width': width, 'height': height},
-                     'resolution_family': resolution_family,
+                     'platform': os_name_mapping.get(os_name.lower(), os_name),
+                     'ui': 'Mobile' if os_name == 'macos' else 'Desktop',
                      'data': {k: json_dict[k] for k in sorted(json_dict)}}
         if game == 'starrail':
             character_pos = save_dict['data']['starrail_relic_equipper_pos']['Pos']
@@ -88,4 +88,4 @@ for game, os_name, resolution in combinations:
                 character_color = blacken_and_restore_color(os.path.join(path, 'characters', file), character_pos)
                 character_colors[file[:-4]] = {'r': int(character_color[0]), 'g': int(character_color[1]), 'b': int(character_color[2])}
             print(character_colors)
-        save_json(save_dict, os.path.join('target', game, os_name, resolution) + '.json')
+        save_json(save_dict, os.path.join('target', game, os_name, os_name + resolution) + '.json')
